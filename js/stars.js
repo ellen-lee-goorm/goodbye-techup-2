@@ -91,10 +91,13 @@
 
   window.addEventListener('resize', () => {
     resize();
-    createStars(Math.floor((canvas.width * canvas.height) / 6000));
+    // 모바일은 별 개수 줄여서 성능 절약
+    const density = window.innerWidth < 768 ? 12000 : 6000;
+    createStars(Math.floor((canvas.width * canvas.height) / density));
   });
 
   resize();
-  createStars(Math.floor((canvas.width * canvas.height) / 6000));
+  const density = window.innerWidth < 768 ? 12000 : 6000;
+  createStars(Math.floor((canvas.width * canvas.height) / density));
   requestAnimationFrame(draw);
 })();
