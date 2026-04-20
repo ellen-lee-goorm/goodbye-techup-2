@@ -169,6 +169,77 @@
     </form>
   </div>
 </div>
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="editModalOverlay">
+  <div class="modal-box" id="editModalBox">
+    <button class="modal-close" id="closeEditModal"><i class="fa-solid fa-xmark"></i></button>
+    <h3 class="modal-title">✏️ 메시지 수정</h3>
+    <p class="modal-desc">카드 내용을 수정해주세요.</p>
+
+    <form id="editForm">
+      <input type="hidden" id="editCardId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>이름 <span class="req">*</span></label>
+          <input type="text" id="editName" placeholder="김테크" maxlength="20" required />
+        </div>
+        <div class="form-group">
+          <label>과정명</label>
+          <input type="text" id="editRole" placeholder="ex)풀스택 과정" maxlength="30" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>대표 이모지</label>
+        <div class="emoji-picker" id="editEmojiPicker">
+          <button type="button" class="emoji-btn active" data-emoji="🚀">🚀</button>
+          <button type="button" class="emoji-btn" data-emoji="✨">✨</button>
+          <button type="button" class="emoji-btn" data-emoji="🌟">🌟</button>
+          <button type="button" class="emoji-btn" data-emoji="💫">💫</button>
+          <button type="button" class="emoji-btn" data-emoji="🎉">🎉</button>
+          <button type="button" class="emoji-btn" data-emoji="🏆">🏆</button>
+          <button type="button" class="emoji-btn" data-emoji="💡">💡</button>
+          <button type="button" class="emoji-btn" data-emoji="⚡">⚡</button>
+          <button type="button" class="emoji-btn" data-emoji="🌈">🌈</button>
+          <button type="button" class="emoji-btn" data-emoji="💎">💎</button>
+          <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
+          <button type="button" class="emoji-btn" data-emoji="🌙">🌙</button>
+          <button type="button" class="emoji-btn" data-emoji="🎯">🎯</button>
+          <button type="button" class="emoji-btn" data-emoji="🦋">🦋</button>
+          <button type="button" class="emoji-btn" data-emoji="🌺">🌺</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>카드 색상</label>
+        <div class="gradient-picker" id="editGradientPicker">
+          <button type="button" class="grad-btn active" data-grad="purple-blue" style="background: linear-gradient(135deg, #7c3aed, #2563eb)"></button>
+          <button type="button" class="grad-btn" data-grad="blue-cyan" style="background: linear-gradient(135deg, #2563eb, #06b6d4)"></button>
+          <button type="button" class="grad-btn" data-grad="green-teal" style="background: linear-gradient(135deg, #059669, #0891b2)"></button>
+          <button type="button" class="grad-btn" data-grad="rose-pink" style="background: linear-gradient(135deg, #e11d48, #db2777)"></button>
+          <button type="button" class="grad-btn" data-grad="amber-orange" style="background: linear-gradient(135deg, #d97706, #ea580c)"></button>
+          <button type="button" class="grad-btn" data-grad="indigo-violet" style="background: linear-gradient(135deg, #4338ca, #7c3aed)"></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>해시태그 <span class="hint">(쉼표로 구분, 최대 3개)</span></label>
+        <input type="text" id="editTags" placeholder="#성장, #도전, #클라우드" maxlength="60" />
+      </div>
+
+      <div class="form-group">
+        <label>메시지 <span class="req">*</span></label>
+        <textarea id="editMessage" placeholder="수정할 메시지를 입력해주세요 ✨" maxlength="300" required></textarea>
+        <span class="char-count"><span id="editCharNum">0</span> / 300</span>
+      </div>
+
+      <button type="submit" class="btn-submit" id="editSubmitBtn">
+        <i class="fa-solid fa-floppy-disk"></i>
+        수정 완료
+      </button>
+    </form>
+  </div>
+</div>
 
 <!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
