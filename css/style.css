@@ -254,9 +254,10 @@ body {
   cursor: default;
   transition: transform var(--transition), box-shadow var(--transition);
   animation: cardIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
-  /* 3:4 비율 고정 — 레퍼런스 카드 */
   aspect-ratio: 3 / 4;
   min-height: 320px;
+  /* 카드 크기 고정 */
+  height: 100%;
 }
 
 .msg-card::before {
@@ -348,6 +349,9 @@ body {
   display: flex;
   flex-direction: column;
   margin-bottom: 12px;
+  min-height: 0;
+  overflow: hidden;
+  /* 내부 메시지 스크롤을 위해 overflow는 hidden 유지 */
 }
 
 .quote-mark {
@@ -358,6 +362,7 @@ body {
   display: block;
   margin-bottom: 10px;
   letter-spacing: -2px;
+  flex-shrink: 0;
 }
 
 .card-message {
@@ -365,11 +370,32 @@ body {
   line-height: 1.8;
   color: rgba(255,255,255,0.92);
   word-break: keep-all;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 7;
-  -webkit-box-orient: vertical;
   flex: 1;
+  /* 기본은 스크롤 없음 — 넘칠 때만 스크롤 */
+  overflow-y: auto;
+  /* 스크롤바는 필요할 때만 표시 */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  padding-right: 2px;
+}
+/* 스크롤이 필요 없는 경우 스크롤바 숨김 */
+.card-message:not(:hover) {
+  scrollbar-color: transparent transparent;
+}
+.card-message::-webkit-scrollbar {
+  width: 3px;
+}
+.card-message::-webkit-scrollbar-track {
+  background: transparent;
+}
+.card-message::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+/* 호버 시에만 스크롤바 색상 표시 */
+.card-message:hover::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
 }
 
 /* Card — Tags */
