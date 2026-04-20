@@ -191,6 +191,18 @@ function renderCard(docSnap, prepend = false) {
   } else {
     cardsGrid.appendChild(card);
   }
+
+  // 메시지가 짧으면 스크롤 비활성화, 길면 활성화
+  requestAnimationFrame(() => {
+    const msgEl = card.querySelector('.card-message');
+    if (msgEl) {
+      if (msgEl.scrollHeight <= msgEl.clientHeight) {
+        msgEl.style.overflowY = 'hidden';
+      } else {
+        msgEl.style.overflowY = 'auto';
+      }
+    }
+  });
 }
 
 // ── Show Empty ──
