@@ -8,7 +8,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs,
-  deleteDoc, doc, query, orderBy, limit, startAfter
+  deleteDoc, doc, updateDoc, query, orderBy, limit, startAfter
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -28,13 +28,15 @@ const PAGE_LIMIT  = 20;
 const ADMIN_PW  = 'ktcloud05!';
 const ADMIN_KEY = 'ktcloud_admin_auth';
 
-let lastDoc       = null;   // 페이지네이션용 마지막 문서
-let totalLoaded   = 0;
-let hasMore       = false;
-let selectedEmoji = '🚀';
-let selectedGrad  = 'purple-blue';
-let isSubmitting  = false;
-let isAdminMode   = false;
+let lastDoc        = null;
+let totalLoaded    = 0;
+let hasMore        = false;
+let selectedEmoji  = '🚀';
+let selectedGrad   = 'purple-blue';
+let editEmoji      = '🚀';
+let editGrad       = 'purple-blue';
+let isSubmitting   = false;
+let isAdminMode    = false;
 
 // ── DOM refs ──
 const cardsGrid         = document.getElementById('cardsGrid');
@@ -60,6 +62,19 @@ const pwError           = document.getElementById('pwError');
 const adminLoginConfirm = document.getElementById('adminLoginConfirm');
 const adminBar          = document.getElementById('adminBar');
 const adminLogoutBtn    = document.getElementById('adminLogoutBtn');
+
+// 수정 모달 DOM refs
+const editModalOverlay  = document.getElementById('editModalOverlay');
+const closeEditModalBtn = document.getElementById('closeEditModal');
+const editForm          = document.getElementById('editForm');
+const editCardIdInput   = document.getElementById('editCardId');
+const editNameInput     = document.getElementById('editName');
+const editRoleInput     = document.getElementById('editRole');
+const editMessageInput  = document.getElementById('editMessage');
+const editCharNumEl     = document.getElementById('editCharNum');
+const editTagsInput     = document.getElementById('editTags');
+const editEmojiPicker   = document.getElementById('editEmojiPicker');
+const editGradientPicker= document.getElementById('editGradientPicker');
 
 // ── Utility ──
 function showToast(msg, duration = 3000) {
@@ -118,17 +133,181 @@ function exitAdminMode() {
 }
 
 function addDeleteBtn(card) {
-  if (card.querySelector('.card-delete-btn')) return;
-  const btn = document.createElement('button');
-  btn.className = 'card-delete-btn';
-  btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-  btn.title = '카드 삭제';
-  btn.addEventListener('click', (e) => {
+  if (card.querySelector('.card-admin-btns')) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'card-admin-btns';
+
+  // 수정 버튼
+  const editBtn = document.createElement('button');
+  editBtn.className = 'card-edit-btn';
+  editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+  editBtn.title = '카드 수정';
+  editBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openEditModal(card);
+  });
+
+  // 삭제 버튼
+  const delBtn = document.createElement('button');
+  delBtn.className = 'card-delete-btn';
+  delBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+  delBtn.title = '카드 삭제';
+  delBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     deleteCard(card);
   });
-  card.appendChild(btn);
+
+  wrap.appendChild(editBtn);
+  wrap.appendChild(delBtn);
+  card.appendChild(wrap);
 }
+
+// ── Edit Modal ──
+function openEditModal(card) {
+  const id      = card.dataset.id;
+  const name    = card.querySelector('.card-name')?.childNodes[0]?.textContent?.trim() || '';
+  const role    = card.querySelector('.card-role')?.textContent?.replace('📚 ', '').trim() || '';
+  const message = card.querySelector('.card-message')?.textContent?.trim() || '';
+  const tags    = Array.from(card.querySelectorAll('.card-tag')).map(t => t.textContent).join(', ');
+  const avatar  = card.querySelector('.card-avatar')?.textContent?.trim() || '🚀';
+  const gradClass = Array.from(card.classList).find(c => c.startsWith('grad-'))?.replace('grad-', '') || 'purple-blue';
+
+  editCardIdInput.value   = id;
+  editNameInput.value     = name;
+  editRoleInput.value     = role;
+  editMessageInput.value  = message;
+  editCharNumEl.textContent = message.length;
+  editTagsInput.value     = tags;
+  editEmoji = avatar;
+  editGrad  = gradClass;
+
+  // 이모지 선택 표시
+  editEmojiPicker.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.emoji === avatar);
+  });
+
+  // 그라디언트 선택 표시
+  editGradientPicker.querySelectorAll('.grad-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.grad === gradClass);
+  });
+
+  editModalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+  editModalOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+closeEditModalBtn.addEventListener('click', closeEditModal);
+editModalOverlay.addEventListener('click', (e) => {
+  if (e.target === editModalOverlay) closeEditModal();
+});
+
+// 수정 모달 이모지 피커
+editEmojiPicker.querySelectorAll('.emoji-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    editEmojiPicker.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    editEmoji = btn.dataset.emoji;
+  });
+});
+
+// 수정 모달 그라디언트 피커
+editGradientPicker.querySelectorAll('.grad-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    editGradientPicker.querySelectorAll('.grad-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    editGrad = btn.dataset.grad;
+  });
+});
+
+// 수정 모달 글자 수
+editMessageInput.addEventListener('input', () => {
+  editCharNumEl.textContent = editMessageInput.value.length;
+});
+
+// 수정 폼 제출
+editForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id      = editCardIdInput.value;
+  const name    = editNameInput.value.trim();
+  const role    = editRoleInput.value.trim();
+  const message = editMessageInput.value.trim();
+  const tagsRaw = editTagsInput.value.trim();
+
+  if (!name || !message) {
+    showToast('⚠️ 이름과 메시지는 필수입니다.');
+    return;
+  }
+
+  const editSubmitBtn = document.getElementById('editSubmitBtn');
+  editSubmitBtn.disabled = true;
+  editSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 수정 중...';
+
+  try {
+    const updatedData = {
+      name,
+      role,
+      message,
+      emoji:    editEmoji,
+      gradient: editGrad,
+      tags:     parseTags(tagsRaw),
+    };
+
+    await updateDoc(doc(db, COL, id), updatedData);
+
+    // 카드 DOM 즉시 업데이트
+    const card = cardsGrid.querySelector(`[data-id="${id}"]`);
+    if (card) {
+      const roleHtml = role ? `<p class="card-role">📚 ${escHtml(role)}</p>` : '';
+      const tagsArr  = parseTags(tagsRaw);
+      const tagsHtml = tagsArr.length
+        ? `<div class="card-tags">${tagsArr.map(t => `<span class="card-tag">${t}</span>`).join('')}</div>`
+        : '';
+      const timeEl   = card.querySelector('.card-time')?.outerHTML || '';
+
+      // 그라디언트 클래스 교체
+      card.className = card.className.replace(/grad-\S+/, `grad-${editGrad}`);
+
+      card.querySelector('.card-avatar').textContent = editEmoji;
+      card.querySelector('.card-name').innerHTML =
+        `${escHtml(name)}<span class="card-name-suffix"> 님</span>`;
+
+      const infoEl = card.querySelector('.card-info');
+      const roleEl = infoEl.querySelector('.card-role');
+      if (roleEl) roleEl.remove();
+      if (role) infoEl.insertAdjacentHTML('beforeend', roleHtml);
+
+      card.querySelector('.card-message').textContent = message;
+
+      // 태그 + 시간 재렌더
+      const existingTags = card.querySelector('.card-tags');
+      if (existingTags) existingTags.remove();
+      const quoteEl = card.querySelector('.card-quote');
+      quoteEl.insertAdjacentHTML('afterend', tagsHtml || '');
+
+      // 스크롤 여부 재판단
+      const msgEl = card.querySelector('.card-message');
+      if (msgEl) {
+        requestAnimationFrame(() => {
+          msgEl.style.overflowY = msgEl.scrollHeight <= msgEl.clientHeight ? 'hidden' : 'auto';
+        });
+      }
+    }
+
+    closeEditModal();
+    showToast('✅ 메시지가 수정되었습니다!');
+  } catch (err) {
+    console.error(err);
+    showToast('❌ 수정에 실패했습니다. 다시 시도해주세요.');
+  } finally {
+    editSubmitBtn.disabled = false;
+    editSubmitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> 수정 완료';
+  }
+});
 
 async function deleteCard(card) {
   const id = card.dataset.id;
@@ -289,7 +468,7 @@ fabBtn.addEventListener('click', openModal);
 closeModalBtn.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeModal(); closeAdminLoginModal(); }
+  if (e.key === 'Escape') { closeModal(); closeAdminLoginModal(); closeEditModal(); }
 });
 
 // ── Admin Login Modal ──
