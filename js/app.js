@@ -12,12 +12,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey:            "AIzaSyDvOuoTdVNM0hpJ_TpXQmxEz6gdTkz8BdM",
-  authDomain:        "lastday-tech-up-1.firebaseapp.com",
-  projectId:         "lastday-tech-up-1",
-  storageBucket:     "lastday-tech-up-1.firebasestorage.app",
-  messagingSenderId: "176007963262",
-  appId:             "1:176007963262:web:25600fa1fd4b4520c1ee2f"
+  apiKey: "AIzaSyCpKXcn7jaQhiuh7P6unTtKt7hwhl82_Os",
+  authDomain: "goodbye-techup-2.firebaseapp.com",
+  projectId: "goodbye-techup-2",
+  storageBucket: "goodbye-techup-2.firebasestorage.app",
+  messagingSenderId: "638559888669",
+  appId: "1:638559888669:web:a621fb62d34d3c346cadf4",
+  measurementId: "G-H8P7Q3D3C4"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
